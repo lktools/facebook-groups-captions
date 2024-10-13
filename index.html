@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Favicon link -->
-    <link rel="icon" type="image/png" href="favicon.png">
-    <title>Group Caption's Generator</title>
-<style>
-        /* Base styles */
+    <title>Group Post Caption Generator</title>
+    <style>
+        /* Styles for layout */
         * {
             margin: 0;
             padding: 0;
@@ -20,30 +18,10 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: var(--background-color);
-            color: var(--text-color);
+            background-color: #121212;
+            color: #ffffff;
             transition: background-color 0.3s, color 0.3s;
             position: relative;
-        }
-
-        :root {
-            /* Light mode colors */
-            --background-color: #000000;
-            --text-color: #ffffff;
-            --primary-color: #007BFF;
-            --box-background-light: rgba(0, 123, 255, 0.1);
-            --button-bg: #007BFF;
-            --button-hover-bg: #0056b3;
-        }
-
-        [data-theme="dark"] {
-            /* Dark mode colors */
-            --background-color: #222020;
-            --text-color: #e0e0e0;
-            --primary-color: #FF9800;
-            --box-background-dark: #242323; /* Lighter than dark background */
-            --button-bg: #FF9800;
-            --button-hover-bg: #FF5722;
         }
 
         .container {
@@ -51,7 +29,7 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #202020;
+            background-color: #1f1f1f;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
@@ -60,174 +38,97 @@
             margin-bottom: 20px;
             padding: 20px;
             font-size: 20px;
-            border: 2px solid var(--primary-color);
+            border: 2px solid #FF9800;
             border-radius: 5px;
-            background-color: var(--box-background-light);
-            height: 150px;  /* Fixed height */
-            width: 600px; /* Fixed width */
-            overflow: hidden; /* Prevent resizing */
+            background-color: #292929;
+            height: 150px;
+            width: 600px;
             display: flex;
             justify-content: center;
             align-items: center;
             text-align: center;
-            transition: background-color 0.3s;
-            white-space: pre-wrap; /* Preserve whitespace */
-            overflow-wrap: break-word; /* Break long words */
+            white-space: pre-wrap;
+            overflow-wrap: break-word;
         }
 
-        [data-theme="dark"] #caption-box {
-            background-color: var(--box-background-dark); /* Lighter box background for dark mode */
-        }
-
-        #copy-button, #reset-button {
+        #generate-button {
             padding: 12px 25px;
             font-size: 16px;
-            background-color: var(--button-bg);
+            background-color: #FF9800;
             color: #fff;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             transition: background-color 0.3s;
-            margin: 5px; /* Add margin for spacing */
         }
 
-        #copy-button:hover, #reset-button:hover {
-            background-color: var(--button-hover-bg);
+        #generate-button:hover {
+            background-color: #FF5722;
         }
 
-        .theme-toggle {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            background-color: var(--button-bg);
-            color: #fff;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .theme-toggle:hover {
-            background-color: var(--button-hover-bg);
-        }
-        h1 {
-        padding-bottom: 20px;
-        }
-        /* Style for caption info display */
         .caption-info {
             margin-top: 10px;
             font-size: 16px;
-            color: var(--primary-color);
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>Group Caption Generator</h1>
+        <h1>Group Post Caption Generator</h1>
         <div id="caption-box">Loading...</div>
-        <div>
-            <button id="copy-button" onclick="copyAndNext()">Copy & Next</button>
-            <button id="reset-button" onclick="resetCaptions()">Reset Captions</button>
-        </div>
-        <div class="caption-info">
-            <span id="total-captions">Total Captions: 0</span> |
-            <span id="remaining-captions">Remaining: 0</span>
-        </div>
+        <button id="generate-button" onclick="generateCaption()">Generate New Caption</button>
     </div>
-    <button class="theme-toggle" onclick="toggleTheme()">Toggle Dark Mode</button>
 
     <script>
         let captions = [];
-        let usedCaptions = JSON.parse(localStorage.getItem('usedCaptions')) || []; // Load used captions from local storage
-        let totalCaptionsCount = 0;
+        let names = [];
+        let ages = [];
+        let locations = [];
 
-        // Function to load captions from the text file
-        async function loadCaptions() {
+        async function loadTextFile(filePath) {
+            const response = await fetch(filePath);
+            const text = await response.text();
+            return text.split('\n').map(line => line.trim()).filter(line => line !== '');
+        }
+
+        async function loadData() {
             try {
-                const response = await fetch('captions.txt');
-                const text = await response.text();
-                captions = text.split('----').map(caption => caption.trim());
-                captions = captions.filter(caption => !usedCaptions.includes(caption)); // Remove already used captions
-                totalCaptionsCount = captions.length + usedCaptions.length; // Store the total count before filtering
-                shuffleCaptions();
-                updateCaptionInfo();
-                showCaption();
+                captions = await loadTextFile('captions.txt');
+                names = await loadTextFile('names.txt');
+                ages = await loadTextFile('ages.txt');
+                locations = await loadTextFile('locations.txt');
+                generateCaption();
             } catch (error) {
-                console.error('Error fetching captions:', error);
-                document.getElementById('caption-box').textContent = 'Error loading captions!';
+                console.error('Error loading files:', error);
+                document.getElementById('caption-box').textContent = 'Error loading data!';
             }
         }
 
-        // Shuffle the captions array
-        function shuffleCaptions() {
-            for (let i = captions.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [captions[i], captions[j]] = [captions[j], captions[i]];
-            }
+        function getRandomItem(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
         }
 
-        // Function to update the captions info (total and remaining)
-        function updateCaptionInfo() {
-            document.getElementById('total-captions').textContent = `Total Captions: ${totalCaptionsCount}`;
-            document.getElementById('remaining-captions').textContent = `Remaining: ${captions.length}`;
-        }
-
-        // Function to display the current caption
-        function showCaption() {
-            const captionBox = document.getElementById('caption-box');
-
-            if (captions.length === 0) {
-                captionBox.textContent = "No more captions!";
-                document.getElementById('copy-button').disabled = true;
+        function generateCaption() {
+            if (captions.length === 0 || names.length === 0 || ages.length === 0 || locations.length === 0) {
+                document.getElementById('caption-box').textContent = 'No data available to generate captions!';
                 return;
             }
 
-            const nextCaption = captions.splice(Math.floor(Math.random() * captions.length), 1)[0]; // Get and remove caption
-            usedCaptions.push(nextCaption);
-            localStorage.setItem('usedCaptions', JSON.stringify(usedCaptions)); // Store used captions in local storage
-            captionBox.textContent = nextCaption;
-            updateCaptionInfo(); // Update the remaining captions
+            const captionTemplate = getRandomItem(captions);
+            const randomName = getRandomItem(names);
+            const randomAge = getRandomItem(ages);
+            const randomLocation = getRandomItem(locations);
+
+            const caption = captionTemplate
+                .replace(/{name}/g, randomName)
+                .replace(/{age}/g, randomAge)
+                .replace(/{location}/g, randomLocation);
+
+            document.getElementById('caption-box').textContent = caption;
         }
 
-        // Function to copy the current caption and show the next one
-        function copyAndNext() {
-            const captionBox = document.getElementById('caption-box');
-            const currentCaption = captionBox.textContent;
-
-            navigator.clipboard.writeText(currentCaption)
-                .then(() => {
-                    console.log('Copied to clipboard:', currentCaption);
-                })
-                .catch(err => {
-                    console.error('Could not copy text:', err);
-                });
-
-            showCaption();
-        }
-
-        // Function to reset the captions
-        function resetCaptions() {
-            usedCaptions = []; // Clear used captions
-            localStorage.removeItem('usedCaptions'); // Remove from local storage
-            loadCaptions(); // Reload captions from file
-            document.getElementById('copy-button').disabled = false; // Enable the copy button
-        }
-
-        // Dark mode toggle
-        function toggleTheme() {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            if (currentTheme === 'dark') {
-                document.documentElement.setAttribute('data-theme', 'light');
-            } else {
-                document.documentElement.setAttribute('data-theme', 'dark');
-            }
-        }
-
-        // Load captions on page load
-        window.onload = loadCaptions;
+        window.onload = loadData;
     </script>
 
 </body>
