@@ -94,112 +94,48 @@
 
     <script>
         let captions = [];
-        let usedCaptions = JSON.parse(localStorage.getItem('usedCaptions')) || []; // Load used captions from local storage
-        let totalCaptionsCount = 0;
-    
         let names = [];
         let ages = [];
         let locations = [];
-    
-        // Function to load data from text files
+
+        async function loadFile(filePath) {
+            const response = await fetch(filePath);
+            const text = await response.text();
+            return text.split('----').map(line => line.trim()).filter(line => line);
+        }
+
         async function loadData() {
-            try {
-                // Load captions
-                const captionsResponse = await fetch('captions.txt');
-                const captionsText = await captionsResponse.text();
-                captions = captionsText.split('----').map(caption => caption.trim());
-                captions = captions.filter(caption => caption && !usedCaptions.includes(caption)); // Remove already used captions
-                totalCaptionsCount = captions.length + usedCaptions.length;
-    
-                // Load names
-                const namesResponse = await fetch('names.txt');
-                const namesText = await namesResponse.text();
-                names = namesText.split('\n').map(name => name.trim());
-    
-                // Load ages
-                const agesResponse = await fetch('ages.txt');
-                const agesText = await agesResponse.text();
-                ages = agesText.split('\n').map(age => age.trim());
-    
-                // Load locations
-                const locationsResponse = await fetch('locations.txt');
-                const locationsText = await locationsResponse.text();
-                locations = locationsText.split('\n').map(location => location.trim());
-    
-                shuffleCaptions();
-                updateCaptionInfo();
-                showCaption();
-            } catch (error) {
-                console.error('Error fetching data:', error);
-                document.getElementById('caption-box').textContent = 'Error loading data!';
+            captions = await loadFile('captions.txt');
+            names = await loadFile('names.txt');
+            ages = await loadFile('ages.txt');
+            locations = await loadFile('locations.txt');
+            generateCaption();
+        }
+
+        function generateCaption() {
+            if (captions.length === 0 || names.length === 0 || ages.length === 0 || locations.length === 0) {
+                document.getElementById('caption-box').textContent = 'No data available!';
+                return;
             }
-        }
-    
-        // Shuffle the captions array
-        function shuffleCaptions() {
-            for (let i = captions.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [captions[i], captions[j]] = [captions[j], captions[i]];
-            }
-        }
-    
-        // Function to update the captions info (total and remaining)
-        function updateCaptionInfo() {
-            document.getElementById('total-captions').textContent = `Total Captions: ${totalCaptionsCount}`;
-            document.getElementById('remaining-captions').textContent = `Remaining: ${captions.length}`;
-        }
-    
-        // Function to replace placeholders in the caption
-        function replacePlaceholders(caption) {
+
+            const randomCaption = captions[Math.floor(Math.random() * captions.length)];
             const randomName = names[Math.floor(Math.random() * names.length)];
             const randomAge = ages[Math.floor(Math.random() * ages.length)];
             const randomLocation = locations[Math.floor(Math.random() * locations.length)];
-    
-            // Replace the placeholders with the actual values
-            caption = caption.replace(/{name}/g, randomName);
-            caption = caption.replace(/{age}/g, randomAge);
-            caption = caption.replace(/{location}/g, randomLocation);
-    
-            return caption;
+
+            const finalCaption = randomCaption
+                .replace('{name}', randomName)
+                .replace('{age}', randomAge)
+                .replace('{location}', randomLocation);
+
+            document.getElementById('caption-box').textContent = finalCaption;
         }
-    
-        // Function to display the current caption
-        function showCaption() {
-            const captionBox = document.getElementById('caption-box');
-    
-            if (captions.length === 0) {
-                captionBox.textContent = "No more captions!";
-                document.getElementById('copy-button').disabled = true;
-                return;
-            }
-    
-            let nextCaption = captions.splice(Math.floor(Math.random() * captions.length), 1)[0]; // Get and remove caption
-            nextCaption = replacePlaceholders(nextCaption); // Replace placeholders
-            usedCaptions.push(nextCaption);
-            localStorage.setItem('usedCaptions', JSON.stringify(usedCaptions)); // Store used captions in local storage
-            captionBox.textContent = nextCaption;
-            updateCaptionInfo(); // Update the remaining captions
+
+        function resetCaptions() {
+            loadData();
         }
-    
-        // Function to copy the current caption and show the next one
-        function copyAndNext() {
-            const captionBox = document.getElementById('caption-box');
-            const currentCaption = captionBox.textContent;
-    
-            navigator.clipboard.writeText(currentCaption)
-                .then(() => {
-                    console.log('Copied to clipboard:', currentCaption);
-                })
-                .catch(err => {
-                    console.error('Could not copy text:', err);
-                });
-    
-            showCaption();
-        }
-    
-        // Load captions and data on page load
+
         window.onload = loadData;
     </script>
-    
 </body>
 </html>
