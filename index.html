@@ -62,7 +62,7 @@
             max-height: 250px; /* Max height for scrolling */
         }
 
-        #generate-button, #reset-button {
+        #copy-next-button, #reset-button {
             padding: 12px 25px;
             font-size: 16px;
             background-color: var(--button-bg);
@@ -74,7 +74,7 @@
             margin: 5px;
         }
 
-        #generate-button:hover, #reset-button:hover {
+        #copy-next-button:hover, #reset-button:hover {
             background-color: var(--button-hover-bg);
         }
 
@@ -85,7 +85,7 @@
         }
 
         h1 {
-        padding-bottom: 20px;
+            padding-bottom: 20px;
         }
     </style>
 </head>
@@ -95,7 +95,7 @@
         <h1>Group & Profile Caption's</h1>
         <div id="caption-box">Loading...</div>
         <div class="caption-info" id="caption-info"></div>
-        <button id="generate-button" onclick="showCaption()">Generate</button>
+        <button id="copy-next-button" onclick="copyAndNext()">Copy and Next</button>
         <button id="reset-button" onclick="resetCaptions()">Reset</button>
     </div>
 
@@ -187,6 +187,22 @@
             localStorage.setItem('usedCaptions', JSON.stringify(usedCaptions)); // Store used captions in local storage
             captionBox.textContent = nextCaption;
             updateCaptionInfo(); // Update the remaining captions
+        }
+
+        // Function to copy the current caption and show the next one
+        function copyAndNext() {
+            const captionBox = document.getElementById('caption-box');
+            const currentCaption = captionBox.textContent;
+
+            navigator.clipboard.writeText(currentCaption)
+                .then(() => {
+                    console.log('Copied to clipboard:', currentCaption);
+                })
+                .catch(err => {
+                    console.error('Could not copy text:', err);
+                });
+
+            showCaption(); // Show the next caption after copying
         }
 
         // Load captions and data on page load
