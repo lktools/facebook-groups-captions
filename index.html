@@ -15,7 +15,6 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
-            flex-direction: column; /* Change to column for footer placement */
             justify-content: center;
             align-items: center;
             height: 100vh;
@@ -28,10 +27,10 @@
         :root {
             --background-color: #000000;
             --text-color: #ffffff;
-            --primary-color: #007BFF;
+            --primary-color: #1877F2;
             --box-background-light: rgba(0, 123, 255, 0.1);
-            --button-bg: #007BFF;
-            --button-hover-bg: #0056b3;
+            --button-bg: #1877F2;
+            --button-hover-bg: #0169e2;
         }
 
         .container {
@@ -51,16 +50,16 @@
             border: 2px solid var(--primary-color);
             border-radius: 5px;
             background-color: var(--box-background-light);
-            height: 150px;
-            width: 600px;
-            overflow: hidden;
+            height: 250px; /* Fixed height */
+            width: 600px; /* Fixed width */
             display: flex;
             justify-content: center;
             align-items: center;
             text-align: center;
             white-space: pre-wrap;
             overflow-wrap: break-word;
-            overflow-y: auto; /* Enable vertical scroll */
+            overflow-y: auto; /* Enable vertical scrolling */
+            max-height: 250px; /* Max height for scrolling */
         }
 
         #generate-button, #reset-button {
@@ -85,12 +84,8 @@
             color: var(--primary-color);
         }
 
-        /* Footer styles */
-        .footer {
-            margin-top: 20px;
-            font-size: 14px;
-            color: #888;
-            text-align: left; /* Align text to the left */
+        h1 {
+        padding-bottom: 20px;
         }
     </style>
 </head>
@@ -99,113 +94,104 @@
     <div class="container">
         <h1>Group Post Caption Generator</h1>
         <div id="caption-box">Loading...</div>
-        <button id="generate-button" onclick="generateCaption()">Generate</button>
-        <button id="reset-button" onclick="resetCaptions()">Reset</button>
         <div class="caption-info" id="caption-info"></div>
+        <button id="generate-button" onclick="showCaption()">Generate</button>
+        <button id="reset-button" onclick="resetCaptions()">Reset</button>
     </div>
 
-    <!-- Footer explaining the placeholders -->
-    <div class="footer">
-        <p>How it works:</p>
-        <p>
-            The placeholders in the captions are replaced with random values from the lists:
-            <ul>
-                <li><strong>{name}</strong> - Random names from the names.txt file.</li>
-                <li><strong>{age}</strong> - Random ages from the ages.txt file.</li>
-                <li><strong>{location}</strong> - Random locations from the locations.txt file.</li>
-            </ul>
-        </p>
-    </div>
+    <script>
+        let captions = [];
+        let usedCaptions = JSON.parse(localStorage.getItem('usedCaptions')) || []; // Load used captions from local storage
+        let totalCaptionsCount = 0;
 
- <script>
-    let captions = [];
-    let usedCaptions = JSON.parse(localStorage.getItem('usedCaptions')) || []; // Load used captions from local storage
-    let totalCaptionsCount = 0;
+        let names = [];
+        let ages = [];
+        let locations = [];
 
-    let names = [];
-    let ages = [];
-    let locations = [];
+        // Function to load data from text files
+        async function loadData() {
+            try {
+                // Load captions
+                const captionsResponse = await fetch('captions.txt');
+                if (!captionsResponse.ok) throw new Error('Network response was not ok');
+                const captionsText = await captionsResponse.text();
+                captions = captionsText.split('----').map(caption => caption.trim());
+                captions = captions.filter(caption => caption && !usedCaptions.includes(caption)); // Remove already used captions
+                totalCaptionsCount = captions.length + usedCaptions.length;
 
-    // Function to load data from text files
-    async function loadData() {
-        try {
-            // Load captions
-            const captionsResponse = await fetch('captions.txt');
-            const captionsText = await captionsResponse.text();
-            captions = captionsText.split('----').map(caption => caption.trim());
-            captions = captions.filter(caption => caption && !usedCaptions.includes(caption)); // Remove already used captions
-            totalCaptionsCount = captions.length + usedCaptions.length;
+                // Load names
+                const namesResponse = await fetch('names.txt');
+                if (!namesResponse.ok) throw new Error('Network response was not ok');
+                const namesText = await namesResponse.text();
+                names = namesText.split('\n').map(name => name.trim());
 
-            // Load names
-            const namesResponse = await fetch('names.txt');
-            const namesText = await namesResponse.text();
-            names = namesText.split('\n').map(name => name.trim());
+                // Load ages
+                const agesResponse = await fetch('ages.txt');
+                if (!agesResponse.ok) throw new Error('Network response was not ok');
+                const agesText = await agesResponse.text();
+                ages = agesText.split('\n').map(age => age.trim());
 
-            // Load ages
-            const agesResponse = await fetch('ages.txt');
-            const agesText = await agesResponse.text();
-            ages = agesText.split('\n').map(age => age.trim());
+                // Load locations
+                const locationsResponse = await fetch('locations.txt');
+                if (!locationsResponse.ok) throw new Error('Network response was not ok');
+                const locationsText = await locationsResponse.text();
+                locations = locationsText.split('\n').map(location => location.trim());
 
-            // Load locations
-            const locationsResponse = await fetch('locations.txt');
-            const locationsText = await locationsResponse.text();
-            locations = locationsText.split('\n').map(location => location.trim());
-
-            updateCaptionInfo();
-            showCaption();
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            document.getElementById('caption-box').textContent = 'Error loading data!';
-        }
-    }
-
-    // Function to update the captions info (total and remaining)
-    function updateCaptionInfo() {
-        const captionInfo = document.getElementById('caption-info');
-        captionInfo.textContent = `Total Captions: ${totalCaptionsCount}, Remaining: ${captions.length}`;
-    }
-
-    // Function to replace placeholders in the caption
-    function replacePlaceholders(caption) {
-        const randomName = names[Math.floor(Math.random() * names.length)];
-        const randomAge = ages[Math.floor(Math.random() * ages.length)];
-        const randomLocation = locations[Math.floor(Math.random() * locations.length)];
-
-        // Replace the placeholders with the actual values
-        caption = caption.replace(/{name}/g, randomName);
-        caption = caption.replace(/{age}/g, randomAge);
-        caption = caption.replace(/{location}/g, randomLocation);
-
-        return caption;
-    }
-
-    // Function to display the current caption
-    function showCaption() {
-        const captionBox = document.getElementById('caption-box');
-
-        if (captions.length === 0) {
-            captionBox.textContent = "No more captions!";
-            return;
+                updateCaptionInfo();
+                showCaption();
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                document.getElementById('caption-box').textContent = 'Error loading data!';
+            }
         }
 
-        let nextCaption = captions.splice(Math.floor(Math.random() * captions.length), 1)[0]; // Get and remove caption
-        nextCaption = replacePlaceholders(nextCaption); // Replace placeholders
-        usedCaptions.push(nextCaption);
-        localStorage.setItem('usedCaptions', JSON.stringify(usedCaptions)); // Store used captions in local storage
-        captionBox.textContent = nextCaption;
-        updateCaptionInfo(); // Update the remaining captions
-    }
+        // Function to reset the captions
+        function resetCaptions() {
+            usedCaptions = []; // Clear used captions
+            localStorage.removeItem('usedCaptions'); // Clear local storage
+            loadData(); // Reload the data
+        }
 
-    // Function to reset captions
-    function resetCaptions() {
-        usedCaptions = [];
-        localStorage.removeItem('usedCaptions'); // Clear used captions in local storage
-        showCaption(); // Show a new caption after reset
-    }
+        // Function to update the captions info (total and remaining)
+        function updateCaptionInfo() {
+            const captionInfo = document.getElementById('caption-info');
+            captionInfo.textContent = `Total Captions: ${totalCaptionsCount}, Remaining: ${captions.length}`;
+        }
 
-    // Load captions and data on page load
-    window.onload = loadData;
-</script>
+        // Function to replace placeholders in the caption
+        function replacePlaceholders(caption) {
+            const randomName = names[Math.floor(Math.random() * names.length)];
+            const randomAge = ages[Math.floor(Math.random() * ages.length)];
+            const randomLocation = locations[Math.floor(Math.random() * locations.length)];
+
+            // Replace the placeholders with the actual values
+            caption = caption.replace(/{name}/g, randomName);
+            caption = caption.replace(/{age}/g, randomAge);
+            caption = caption.replace(/{location}/g, randomLocation);
+
+            return caption;
+        }
+
+        // Function to display the current caption
+        function showCaption() {
+            const captionBox = document.getElementById('caption-box');
+
+            if (captions.length === 0) {
+                captionBox.textContent = "No more captions!";
+                return;
+            }
+
+            let nextCaption = captions.splice(Math.floor(Math.random() * captions.length), 1)[0]; // Get and remove caption
+            nextCaption = replacePlaceholders(nextCaption); // Replace placeholders
+            usedCaptions.push(nextCaption);
+            localStorage.setItem('usedCaptions', JSON.stringify(usedCaptions)); // Store used captions in local storage
+            captionBox.textContent = nextCaption;
+            updateCaptionInfo(); // Update the remaining captions
+        }
+
+        // Load captions and data on page load
+        window.onload = loadData;
+    </script>
 
 </body>
 </html>
