@@ -106,6 +106,13 @@
                 padding: 10px 20px;
             }
         }
+
+        /* Style for caption info display */
+        .caption-info {
+            margin-top: 10px;
+            font-size: 16px;
+            color: var(--primary-color);
+        }
     </style>
 </head>
 <body>
@@ -114,12 +121,17 @@
         <h1>Caption Generator</h1>
         <div id="caption-box">Loading...</div>
         <button id="copy-button" onclick="copyAndNext()">Copy & Next</button>
+        <div class="caption-info">
+            <span id="total-captions">Total Captions: 0</span> |
+            <span id="remaining-captions">Remaining: 0</span>
+        </div>
     </div>
     <button class="theme-toggle" onclick="toggleTheme()">Toggle Dark Mode</button>
 
     <script>
         let captions = [];
-        let currentIndex = 0;
+        let usedCaptions = JSON.parse(localStorage.getItem('usedCaptions')) || []; // Load used captions from local storage
+        let totalCaptionsCount = 0;
 
         // Function to load captions from the text file
         async function loadCaptions() {
@@ -127,7 +139,10 @@
                 const response = await fetch('captions.txt');
                 const text = await response.text();
                 captions = text.split('----').map(caption => caption.trim());
-                shuffleCaptions();  // Shuffle captions once they are loaded
+                captions = captions.filter(caption => !usedCaptions.includes(caption)); // Remove already used captions
+                totalCaptionsCount = captions.length + usedCaptions.length; // Store the total count before filtering
+                shuffleCaptions();
+                updateCaptionInfo();
                 showCaption();
             } catch (error) {
                 console.error('Error fetching captions:', error);
@@ -139,36 +154,47 @@
         function shuffleCaptions() {
             for (let i = captions.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
-                [captions[i], captions[j]] = [captions[j], captions[i]];  // Swap elements
+                [captions[i], captions[j]] = [captions[j], captions[i]];
             }
+        }
+
+        // Function to update the captions info (total and remaining)
+        function updateCaptionInfo() {
+            document.getElementById('total-captions').textContent = `Total Captions: ${totalCaptionsCount}`;
+            document.getElementById('remaining-captions').textContent = `Remaining: ${captions.length}`;
         }
 
         // Function to display the current caption
         function showCaption() {
             const captionBox = document.getElementById('caption-box');
-            if (currentIndex < captions.length) {
-                captionBox.textContent = captions[currentIndex];
-            } else {
+
+            if (captions.length === 0) {
                 captionBox.textContent = "No more captions!";
                 document.getElementById('copy-button').disabled = true;
+                return;
             }
+
+            const nextCaption = captions.splice(Math.floor(Math.random() * captions.length), 1)[0]; // Get and remove caption
+            usedCaptions.push(nextCaption);
+            localStorage.setItem('usedCaptions', JSON.stringify(usedCaptions)); // Store used captions in local storage
+            captionBox.textContent = nextCaption;
+            updateCaptionInfo(); // Update the remaining captions
         }
 
         // Function to copy the current caption and show the next one
         function copyAndNext() {
-            if (currentIndex < captions.length) {
-                const currentCaption = captions[currentIndex];
-                navigator.clipboard.writeText(currentCaption)
-                    .then(() => {
-                        console.log('Copied to clipboard:', currentCaption);
-                    })
-                    .catch(err => {
-                        console.error('Could not copy text:', err);
-                    });
+            const captionBox = document.getElementById('caption-box');
+            const currentCaption = captionBox.textContent;
 
-                currentIndex++;
-                showCaption();
-            }
+            navigator.clipboard.writeText(currentCaption)
+                .then(() => {
+                    console.log('Copied to clipboard:', currentCaption);
+                })
+                .catch(err => {
+                    console.error('Could not copy text:', err);
+                });
+
+            showCaption();
         }
 
         // Dark mode toggle
