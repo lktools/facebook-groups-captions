@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Groups Caption Generator</title>
+    <title>Caption Generator</title>
     <style>
         /* Base styles */
         * {
@@ -21,6 +21,7 @@
             background-color: var(--background-color);
             color: var(--text-color);
             transition: background-color 0.3s, color 0.3s;
+            position: relative;
         }
 
         :root {
@@ -78,14 +79,16 @@
         }
 
         .theme-toggle {
-            margin-top: 20px;
-            cursor: pointer;
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
             background-color: var(--button-bg);
             color: #fff;
             padding: 10px 20px;
             border: none;
             border-radius: 8px;
             font-size: 14px;
+            cursor: pointer;
             transition: background-color 0.3s;
         }
 
@@ -111,8 +114,8 @@
         <h1>Caption Generator</h1>
         <div id="caption-box">Loading...</div>
         <button id="copy-button" onclick="copyAndNext()">Copy & Next</button>
-        <button class="theme-toggle" onclick="toggleTheme()">Toggle Dark Mode</button>
     </div>
+    <button class="theme-toggle" onclick="toggleTheme()">Toggle Dark Mode</button>
 
     <script>
         let captions = [];
@@ -124,10 +127,19 @@
                 const response = await fetch('captions.txt');
                 const text = await response.text();
                 captions = text.split('----').map(caption => caption.trim());
+                shuffleCaptions();  // Shuffle captions once they are loaded
                 showCaption();
             } catch (error) {
                 console.error('Error fetching captions:', error);
                 document.getElementById('caption-box').textContent = 'Error loading captions!';
+            }
+        }
+
+        // Shuffle the captions array
+        function shuffleCaptions() {
+            for (let i = captions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [captions[i], captions[j]] = [captions[j], captions[i]];  // Swap elements
             }
         }
 
