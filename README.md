@@ -2,7 +2,8 @@
 
 A simple web application that generates captions for group posts and profiles, allowing users to customize their captions with placeholders for names, ages, and locations. This application dynamically pulls data from text files, providing an enjoyable and unique way to create captions for social media.
 
-![Group & Profile Caption Generator](favicon.png)  <!-- This line adds your favicon as an image preview -->
+![fb-group](https://github.com/user-attachments/assets/55d41bdb-e292-41af-a2c8-0bafed69365f)
+ <!-- This line adds your favicon as an image preview -->
 
 ## Features
 
