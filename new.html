@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Group Post Caption Generator</title>
     <style>
-        /* Base styles */
+        /* Styles for layout */
         * {
             margin: 0;
             padding: 0;
@@ -18,19 +18,10 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: var(--background-color);
-            color: var(--text-color);
+            background-color: #121212;
+            color: #ffffff;
             transition: background-color 0.3s, color 0.3s;
             position: relative;
-        }
-
-        :root {
-            --background-color: #121212;
-            --text-color: #ffffff;
-            --primary-color: #FF9800;
-            --box-background: #1f1f1f;
-            --button-bg: #FF9800;
-            --button-hover-bg: #FF5722;
         }
 
         .container {
@@ -38,7 +29,7 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            background-color: var(--box-background);
+            background-color: #1f1f1f;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
@@ -47,22 +38,23 @@
             margin-bottom: 20px;
             padding: 20px;
             font-size: 20px;
-            border: 2px solid var(--primary-color);
+            border: 2px solid #FF9800;
             border-radius: 5px;
-            background-color: var(--box-background);
+            background-color: #292929;
             height: 150px;
             width: 600px;
             display: flex;
             justify-content: center;
             align-items: center;
             text-align: center;
-            transition: background-color 0.3s;
+            white-space: pre-wrap;
+            overflow-wrap: break-word;
         }
 
-        #generate-button, #reset-button {
+        #generate-button {
             padding: 12px 25px;
             font-size: 16px;
-            background-color: var(--button-bg);
+            background-color: #FF9800;
             color: #fff;
             border: none;
             border-radius: 8px;
@@ -70,14 +62,13 @@
             transition: background-color 0.3s;
         }
 
-        #generate-button:hover, #reset-button:hover {
-            background-color: var(--button-hover-bg);
+        #generate-button:hover {
+            background-color: #FF5722;
         }
 
         .caption-info {
             margin-top: 10px;
             font-size: 16px;
-            color: var(--primary-color);
         }
     </style>
 </head>
@@ -86,50 +77,58 @@
     <div class="container">
         <h1>Group Post Caption Generator</h1>
         <div id="caption-box">Loading...</div>
-        <button id="generate-button" onclick="generateCaption()">Generate Caption</button>
+        <button id="generate-button" onclick="generateCaption()">Generate New Caption</button>
     </div>
 
     <script>
+        let captions = [];
         let names = [];
         let ages = [];
         let locations = [];
-        const template = "Sample Girl {name} and She is good and She is {age} and she Lives in {location}.";
 
-        async function loadFile(fileName) {
-            const response = await fetch(fileName);
+        async function loadTextFile(filePath) {
+            const response = await fetch(filePath);
             const text = await response.text();
-            return text.trim().split('\n');
+            return text.split('\n').map(line => line.trim()).filter(line => line !== '');
         }
 
-        async function loadFiles() {
+        async function loadData() {
             try {
-                names = await loadFile('names.txt');
-                ages = await loadFile('ages.txt');
-                locations = await loadFile('locations.txt');
-                document.getElementById('caption-box').textContent = "Ready to generate captions!";
+                captions = await loadTextFile('captions.txt');
+                names = await loadTextFile('names.txt');
+                ages = await loadTextFile('ages.txt');
+                locations = await loadTextFile('locations.txt');
+                generateCaption();
             } catch (error) {
-                console.error("Error loading files:", error);
-                document.getElementById('caption-box').textContent = "Error loading files!";
+                console.error('Error loading files:', error);
+                document.getElementById('caption-box').textContent = 'Error loading data!';
             }
         }
 
-        function getRandomElement(arr) {
+        function getRandomItem(arr) {
             return arr[Math.floor(Math.random() * arr.length)];
         }
 
         function generateCaption() {
-            const name = getRandomElement(names);
-            const age = getRandomElement(ages);
-            const location = getRandomElement(locations);
-            const caption = template
-                .replace('{name}', name)
-                .replace('{age}', age)
-                .replace('{location}', location);
+            if (captions.length === 0 || names.length === 0 || ages.length === 0 || locations.length === 0) {
+                document.getElementById('caption-box').textContent = 'No data available to generate captions!';
+                return;
+            }
+
+            const captionTemplate = getRandomItem(captions);
+            const randomName = getRandomItem(names);
+            const randomAge = getRandomItem(ages);
+            const randomLocation = getRandomItem(locations);
+
+            const caption = captionTemplate
+                .replace(/{name}/g, randomName)
+                .replace(/{age}/g, randomAge)
+                .replace(/{location}/g, randomLocation);
 
             document.getElementById('caption-box').textContent = caption;
         }
 
-        window.onload = loadFiles;
+        window.onload = loadData;
     </script>
 
 </body>
