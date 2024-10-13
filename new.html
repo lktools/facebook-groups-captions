@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Post Caption Generator</title>
+    <style>
+        /* Base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+            position: relative;
+        }
+
+        :root {
+            --background-color: #121212;
+            --text-color: #ffffff;
+            --primary-color: #FF9800;
+            --box-background: #1f1f1f;
+            --button-bg: #FF9800;
+            --button-hover-bg: #FF5722;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--box-background);
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        #caption-box {
+            margin-bottom: 20px;
+            padding: 20px;
+            font-size: 20px;
+            border: 2px solid var(--primary-color);
+            border-radius: 5px;
+            background-color: var(--box-background);
+            height: 150px;
+            width: 600px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+
+        #generate-button, #reset-button {
+            padding: 12px 25px;
+            font-size: 16px;
+            background-color: var(--button-bg);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #generate-button:hover, #reset-button:hover {
+            background-color: var(--button-hover-bg);
+        }
+
+        .caption-info {
+            margin-top: 10px;
+            font-size: 16px;
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Group Post Caption Generator</h1>
+        <div id="caption-box">Loading...</div>
+        <button id="generate-button" onclick="generateCaption()">Generate Caption</button>
+    </div>
+
+    <script>
+        let names = [];
+        let ages = [];
+        let locations = [];
+        const template = "Sample Girl {name} and She is good and She is {age} and she Lives in {location}.";
+
+        async function loadFile(fileName) {
+            const response = await fetch(fileName);
+            const text = await response.text();
+            return text.trim().split('\n');
+        }
+
+        async function loadFiles() {
+            try {
+                names = await loadFile('names.txt');
+                ages = await loadFile('ages.txt');
+                locations = await loadFile('locations.txt');
+                document.getElementById('caption-box').textContent = "Ready to generate captions!";
+            } catch (error) {
+                console.error("Error loading files:", error);
+                document.getElementById('caption-box').textContent = "Error loading files!";
+            }
+        }
+
+        function getRandomElement(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function generateCaption() {
+            const name = getRandomElement(names);
+            const age = getRandomElement(ages);
+            const location = getRandomElement(locations);
+            const caption = template
+                .replace('{name}', name)
+                .replace('{age}', age)
+                .replace('{location}', location);
+
+            document.getElementById('caption-box').textContent = caption;
+        }
+
+        window.onload = loadFiles;
+    </script>
+
+</body>
+</html>
