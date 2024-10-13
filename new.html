@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Group Post Caption Generator</title>
     <style>
-        /* Styles for layout */
         * {
             margin: 0;
             padding: 0;
@@ -86,40 +85,46 @@
         let ages = [];
         let locations = [];
 
+        // Load text file content and return array of lines
         async function loadTextFile(filePath) {
             const response = await fetch(filePath);
             const text = await response.text();
             return text.split('\n').map(line => line.trim()).filter(line => line !== '');
         }
 
+        // Load all data (captions, names, ages, locations)
         async function loadData() {
             try {
                 captions = await loadTextFile('captions.txt');
                 names = await loadTextFile('names.txt');
                 ages = await loadTextFile('ages.txt');
                 locations = await loadTextFile('locations.txt');
-                generateCaption();
+                generateCaption(); // Generate a caption on load
             } catch (error) {
                 console.error('Error loading files:', error);
                 document.getElementById('caption-box').textContent = 'Error loading data!';
             }
         }
 
+        // Get random item from array
         function getRandomItem(arr) {
             return arr[Math.floor(Math.random() * arr.length)];
         }
 
+        // Generate caption by filling template placeholders
         function generateCaption() {
             if (captions.length === 0 || names.length === 0 || ages.length === 0 || locations.length === 0) {
                 document.getElementById('caption-box').textContent = 'No data available to generate captions!';
                 return;
             }
 
+            // Get random caption template and replace placeholders
             const captionTemplate = getRandomItem(captions);
             const randomName = getRandomItem(names);
             const randomAge = getRandomItem(ages);
             const randomLocation = getRandomItem(locations);
 
+            // Replace placeholders
             const caption = captionTemplate
                 .replace(/{name}/g, randomName)
                 .replace(/{age}/g, randomAge)
@@ -128,6 +133,7 @@
             document.getElementById('caption-box').textContent = caption;
         }
 
+        // Load data on page load
         window.onload = loadData;
     </script>
 
