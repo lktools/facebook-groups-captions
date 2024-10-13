@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="favicon.png" type="image/png">
-    <title>Group Post Caption Generator</title>
+    <title>Group & Profile Post Caption's Generator</title>
     <style>
         * {
             margin: 0;
@@ -87,33 +87,17 @@
         h1 {
         padding-bottom: 20px;
         }
-
-        footer {
-            margin-top: auto; /* Push footer to the bottom */
-            padding: 10px;
-            background-color: #202020;
-            color: #ffffff;
-            text-align: center;
-            width: 100%; /* Full width */
-        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>Group Post Caption Generator</h1>
+        <h1>Group & Profile Post Caption's Generator</h1>
         <div id="caption-box">Loading...</div>
         <div class="caption-info" id="caption-info"></div>
         <button id="generate-button" onclick="showCaption()">Generate</button>
         <button id="reset-button" onclick="resetCaptions()">Reset</button>
     </div>
-
-    <footer>
-        <p>How to Use:</p>
-        <p>{name} - Randomly selected name from names.txt</p>
-        <p>{age} - Randomly selected age from ages.txt</p>
-        <p>{location} - Randomly selected location from locations.txt</p>
-    </footer>
 
     <script>
         let captions = [];
