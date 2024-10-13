@@ -63,12 +63,14 @@
             background-color: var(--box-background-light);
             height: 150px;  /* Fixed height */
             width: 100%; /* Full width inside container */
-            overflow: hidden; /* No resizing based on text */
+            overflow: hidden; /* Prevent resizing */
             display: flex;
             justify-content: center;
             align-items: center;
             text-align: center;
             transition: background-color 0.3s;
+            white-space: pre-wrap; /* Preserve whitespace */
+            overflow-wrap: break-word; /* Break long words */
         }
 
         [data-theme="dark"] #caption-box {
