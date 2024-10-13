@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Generation Script</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+        #caption-box {
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 2px solid #007BFF;
+            border-radius: 5px;
+            font-size: 18px;
+            background-color: #f0f0f0;
+            color: #333;
+            min-height: 50px;
+        }
+        #copy-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #copy-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Caption Generator</h1>
+    <div id="caption-box">Loading...</div>
+    <button id="copy-button" onclick="copyAndNext()">Copy & Next</button>
+
+    <script>
+        let captions = [];
+        let currentIndex = 0;
+
+        // Function to load captions from the text file
+        async function loadCaptions() {
+            try {
+                const response = await fetch('captions.txt'); // Ensure captions.txt is in the same directory
+                const text = await response.text();
+                captions = text.split('----').map(caption => caption.trim()); // Split on '----' and trim whitespace
+                showCaption(); // Show the first caption
+            } catch (error) {
+                console.error('Error fetching captions:', error);
+                document.getElementById('caption-box').textContent = 'Error loading captions!';
+            }
+        }
+
+        // Function to display the current caption
+        function showCaption() {
+            const captionBox = document.getElementById('caption-box');
+            if (currentIndex < captions.length) {
+                captionBox.textContent = captions[currentIndex];
+            } else {
+                captionBox.textContent = "No more captions!";
+                document.getElementById('copy-button').disabled = true; // Disable the button if no more captions
+            }
+        }
+
+        // Function to copy the current caption and show the next one
+        function copyAndNext() {
+            if (currentIndex < captions.length) {
+                // Copy the current caption to clipboard
+                const currentCaption = captions[currentIndex];
+                navigator.clipboard.writeText(currentCaption)
+                    .then(() => {
+                        console.log('Copied to clipboard:', currentCaption);
+                    })
+                    .catch(err => {
+                        console.error('Could not copy text:', err);
+                    });
+
+                // Move to the next caption
+                currentIndex++;
+                showCaption();
+            }
+        }
+
+        // Load captions on page load
+        window.onload = loadCaptions;
+    </script>
+
+</body>
+</html>
