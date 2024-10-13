@@ -49,15 +49,17 @@
             border: 2px solid var(--primary-color);
             border-radius: 5px;
             background-color: var(--box-background-light);
-            height: 150px;
-            width: 600px;
-            overflow: hidden;
+            height: 150px; /* Fixed height */
+            width: 600px; /* Fixed width */
+            overflow: hidden; /* Prevent resizing */
             display: flex;
             justify-content: center;
             align-items: center;
             text-align: center;
             white-space: pre-wrap;
             overflow-wrap: break-word;
+            overflow-y: auto; /* Enable vertical scrolling */
+            max-height: 150px; /* Max height for scrolling */
         }
 
         #generate-button, #reset-button {
