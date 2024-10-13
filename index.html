@@ -3,42 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Text Generation Script</title>
+    <title>Caption Generator</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 50px;
+        /* Base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        :root {
+            /* Light mode colors */
+            --background-color: #f0f0f0;
+            --text-color: #333;
+            --primary-color: #007BFF;
+            --button-bg: #007BFF;
+            --button-hover-bg: #0056b3;
+        }
+
+        [data-theme="dark"] {
+            /* Dark mode colors */
+            --background-color: #121212;
+            --text-color: #e0e0e0;
+            --primary-color: #BB86FC;
+            --button-bg: #BB86FC;
+            --button-hover-bg: #8f6fc4;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--background-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
         #caption-box {
             margin-bottom: 20px;
             padding: 20px;
-            border: 2px solid #007BFF;
+            font-size: 20px;
+            border: 2px solid var(--primary-color);
             border-radius: 5px;
-            font-size: 18px;
-            background-color: #f0f0f0;
-            color: #333;
+            background-color: rgba(0, 123, 255, 0.1);
             min-height: 50px;
+            transition: background-color 0.3s;
         }
+
         #copy-button {
-            padding: 10px 20px;
+            padding: 12px 25px;
             font-size: 16px;
-            background-color: #007BFF;
+            background-color: var(--button-bg);
             color: #fff;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
+            transition: background-color 0.3s;
         }
+
         #copy-button:hover {
-            background-color: #0056b3;
+            background-color: var(--button-hover-bg);
+        }
+
+        .theme-toggle {
+            margin-top: 20px;
+            cursor: pointer;
+            background-color: var(--button-bg);
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--button-hover-bg);
+        }
+
+        /* Responsive styling */
+        @media (max-width: 600px) {
+            #caption-box {
+                font-size: 16px;
+            }
+            #copy-button {
+                font-size: 14px;
+                padding: 10px 20px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <h1>Caption Generator</h1>
-    <div id="caption-box">Loading...</div>
-    <button id="copy-button" onclick="copyAndNext()">Copy & Next</button>
+    <div class="container">
+        <h1>Caption Generator</h1>
+        <div id="caption-box">Loading...</div>
+        <button id="copy-button" onclick="copyAndNext()">Copy & Next</button>
+        <button class="theme-toggle" onclick="toggleTheme()">Toggle Dark Mode</button>
+    </div>
 
     <script>
         let captions = [];
@@ -47,10 +121,10 @@
         // Function to load captions from the text file
         async function loadCaptions() {
             try {
-                const response = await fetch('captions.txt'); // Ensure captions.txt is in the same directory
+                const response = await fetch('captions.txt');
                 const text = await response.text();
-                captions = text.split('----').map(caption => caption.trim()); // Split on '----' and trim whitespace
-                showCaption(); // Show the first caption
+                captions = text.split('----').map(caption => caption.trim());
+                showCaption();
             } catch (error) {
                 console.error('Error fetching captions:', error);
                 document.getElementById('caption-box').textContent = 'Error loading captions!';
@@ -64,14 +138,13 @@
                 captionBox.textContent = captions[currentIndex];
             } else {
                 captionBox.textContent = "No more captions!";
-                document.getElementById('copy-button').disabled = true; // Disable the button if no more captions
+                document.getElementById('copy-button').disabled = true;
             }
         }
 
         // Function to copy the current caption and show the next one
         function copyAndNext() {
             if (currentIndex < captions.length) {
-                // Copy the current caption to clipboard
                 const currentCaption = captions[currentIndex];
                 navigator.clipboard.writeText(currentCaption)
                     .then(() => {
@@ -81,9 +154,18 @@
                         console.error('Could not copy text:', err);
                     });
 
-                // Move to the next caption
                 currentIndex++;
                 showCaption();
+            }
+        }
+
+        // Dark mode toggle
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            if (currentTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'light');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
             }
         }
 
