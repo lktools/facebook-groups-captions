@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Group Post Caption Generator</title>
     <style>
-        /* Base styles */
         * {
             margin: 0;
             padding: 0;
@@ -25,23 +24,12 @@
         }
 
         :root {
-            /* Light mode colors */
             --background-color: #000000;
             --text-color: #ffffff;
             --primary-color: #007BFF;
             --box-background-light: rgba(0, 123, 255, 0.1);
             --button-bg: #007BFF;
             --button-hover-bg: #0056b3;
-        }
-
-        [data-theme="dark"] {
-            /* Dark mode colors */
-            --background-color: #222020;
-            --text-color: #e0e0e0;
-            --primary-color: #FF9800;
-            --box-background-dark: #242323; /* Lighter than dark background */
-            --button-bg: #FF9800;
-            --button-hover-bg: #FF5722;
         }
 
         .container {
@@ -61,23 +49,18 @@
             border: 2px solid var(--primary-color);
             border-radius: 5px;
             background-color: var(--box-background-light);
-            height: 150px;  /* Fixed height */
-            width: 600px; /* Fixed width */
-            overflow: hidden; /* Prevent resizing */
+            height: 150px;
+            width: 600px;
+            overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
             text-align: center;
-            transition: background-color 0.3s;
-            white-space: pre-wrap; /* Preserve whitespace */
-            overflow-wrap: break-word; /* Break long words */
+            white-space: pre-wrap;
+            overflow-wrap: break-word;
         }
 
-        [data-theme="dark"] #caption-box {
-            background-color: var(--box-background-dark); /* Lighter box background for dark mode */
-        }
-
-        #copy-button, #reset-button {
+        #generate-button, #reset-button {
             padding: 12px 25px;
             font-size: 16px;
             background-color: var(--button-bg);
@@ -86,34 +69,13 @@
             border-radius: 8px;
             cursor: pointer;
             transition: background-color 0.3s;
-            margin: 5px; /* Add margin for spacing */
+            margin: 5px;
         }
 
-        #copy-button:hover, #reset-button:hover {
+        #generate-button:hover, #reset-button:hover {
             background-color: var(--button-hover-bg);
         }
 
-        .theme-toggle {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            background-color: var(--button-bg);
-            color: #fff;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .theme-toggle:hover {
-            background-color: var(--button-hover-bg);
-        }
-        h1 {
-            padding-bottom: 20px;
-        }
-        /* Style for caption info display */
         .caption-info {
             margin-top: 10px;
             font-size: 16px;
@@ -126,13 +88,9 @@
     <div class="container">
         <h1>Group Post Caption Generator</h1>
         <div id="caption-box">Loading...</div>
-        <button id="copy-button" onclick="copyAndNext()">Copy & Next</button>
-        <div class="caption-info">
-            <span id="total-captions">Total Captions: 0</span> |
-            <span id="remaining-captions">Remaining: 0</span>
-        </div>
+        <button id="generate-button" onclick="generateCaption()">Generate</button>
+        <button id="reset-button" onclick="resetCaptions()">Reset</button>
     </div>
-    <button class="theme-toggle" onclick="toggleTheme()">Toggle Dark Mode</button>
 
     <script>
         let captions = [];
@@ -241,6 +199,7 @@
     
         // Load captions and data on page load
         window.onload = loadData;
-    </script>    
+    </script>
+    
 </body>
 </html>
