@@ -77,7 +77,7 @@
             background-color: var(--box-background-dark); /* Lighter box background for dark mode */
         }
 
-        #copy-button {
+        #copy-button, #reset-button {
             padding: 12px 25px;
             font-size: 16px;
             background-color: var(--button-bg);
@@ -86,9 +86,10 @@
             border-radius: 8px;
             cursor: pointer;
             transition: background-color 0.3s;
+            margin: 5px; /* Add margin for spacing */
         }
 
-        #copy-button:hover {
+        #copy-button:hover, #reset-button:hover {
             background-color: var(--button-hover-bg);
         }
 
@@ -123,7 +124,10 @@
     <div class="container">
         <h1>Caption Generator</h1>
         <div id="caption-box">Loading...</div>
-        <button id="copy-button" onclick="copyAndNext()">Copy & Next</button>
+        <div>
+            <button id="copy-button" onclick="copyAndNext()">Copy & Next</button>
+            <button id="reset-button" onclick="resetCaptions()">Reset Captions</button>
+        </div>
         <div class="caption-info">
             <span id="total-captions">Total Captions: 0</span> |
             <span id="remaining-captions">Remaining: 0</span>
@@ -198,6 +202,14 @@
                 });
 
             showCaption();
+        }
+
+        // Function to reset the captions
+        function resetCaptions() {
+            usedCaptions = []; // Clear used captions
+            localStorage.removeItem('usedCaptions'); // Remove from local storage
+            loadCaptions(); // Reload captions from file
+            document.getElementById('copy-button').disabled = false; // Enable the copy button
         }
 
         // Dark mode toggle
