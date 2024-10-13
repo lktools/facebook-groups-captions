@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Group Post Caption Generator</title>
     <style>
+        /* Base styles */
         * {
             margin: 0;
             padding: 0;
@@ -17,10 +18,30 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #121212;
-            color: #ffffff;
+            background-color: var(--background-color);
+            color: var(--text-color);
             transition: background-color 0.3s, color 0.3s;
             position: relative;
+        }
+
+        :root {
+            /* Light mode colors */
+            --background-color: #000000;
+            --text-color: #ffffff;
+            --primary-color: #007BFF;
+            --box-background-light: rgba(0, 123, 255, 0.1);
+            --button-bg: #007BFF;
+            --button-hover-bg: #0056b3;
+        }
+
+        [data-theme="dark"] {
+            /* Dark mode colors */
+            --background-color: #222020;
+            --text-color: #e0e0e0;
+            --primary-color: #FF9800;
+            --box-background-dark: #242323; /* Lighter than dark background */
+            --button-bg: #FF9800;
+            --button-hover-bg: #FF5722;
         }
 
         .container {
@@ -28,7 +49,7 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #1f1f1f;
+            background-color: #202020;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
@@ -37,37 +58,66 @@
             margin-bottom: 20px;
             padding: 20px;
             font-size: 20px;
-            border: 2px solid #FF9800;
+            border: 2px solid var(--primary-color);
             border-radius: 5px;
-            background-color: #292929;
-            height: 150px;
-            width: 600px;
+            background-color: var(--box-background-light);
+            height: 150px;  /* Fixed height */
+            width: 600px; /* Fixed width */
+            overflow: hidden; /* Prevent resizing */
             display: flex;
             justify-content: center;
             align-items: center;
             text-align: center;
-            white-space: pre-wrap;
-            overflow-wrap: break-word;
+            transition: background-color 0.3s;
+            white-space: pre-wrap; /* Preserve whitespace */
+            overflow-wrap: break-word; /* Break long words */
         }
 
-        #generate-button {
+        [data-theme="dark"] #caption-box {
+            background-color: var(--box-background-dark); /* Lighter box background for dark mode */
+        }
+
+        #copy-button, #reset-button {
             padding: 12px 25px;
             font-size: 16px;
-            background-color: #FF9800;
+            background-color: var(--button-bg);
             color: #fff;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             transition: background-color 0.3s;
+            margin: 5px; /* Add margin for spacing */
         }
 
-        #generate-button:hover {
-            background-color: #FF5722;
+        #copy-button:hover, #reset-button:hover {
+            background-color: var(--button-hover-bg);
         }
 
+        .theme-toggle {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background-color: var(--button-bg);
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--button-hover-bg);
+        }
+        h1 {
+            padding-bottom: 20px;
+        }
+        /* Style for caption info display */
         .caption-info {
             margin-top: 10px;
             font-size: 16px;
+            color: var(--primary-color);
         }
     </style>
 </head>
@@ -76,66 +126,79 @@
     <div class="container">
         <h1>Group Post Caption Generator</h1>
         <div id="caption-box">Loading...</div>
-        <button id="generate-button" onclick="generateCaption()">Generate New Caption</button>
+        <button id="copy-button" onclick="copyAndNext()">Copy & Next</button>
+        <div class="caption-info">
+            <span id="total-captions">Total Captions: 0</span> |
+            <span id="remaining-captions">Remaining: 0</span>
+        </div>
     </div>
+    <button class="theme-toggle" onclick="toggleTheme()">Toggle Dark Mode</button>
 
     <script>
         let captions = [];
-        let names = [];
-        let ages = [];
-        let locations = [];
+        let usedCaptions = JSON.parse(localStorage.getItem('usedCaptions')) || [];
+        let totalCaptionsCount = 0;
 
-        // Load text file content and return array of lines
-        async function loadTextFile(filePath) {
-            const response = await fetch(filePath);
-            const text = await response.text();
-            return text.split('\n').map(line => line.trim()).filter(line => line !== '');
-        }
-
-        // Load all data (captions, names, ages, locations)
-        async function loadData() {
+        async function loadCaptions() {
             try {
-                captions = await loadTextFile('captions.txt');
-                names = await loadTextFile('names.txt');
-                ages = await loadTextFile('ages.txt');
-                locations = await loadTextFile('locations.txt');
-                generateCaption(); // Generate a caption on load
+                const response = await fetch('captions.txt');
+                const text = await response.text();
+                captions = text.split('----').map(caption => caption.trim());
+                captions = captions.filter(caption => caption && !usedCaptions.includes(caption)); // Filter out empty and used captions
+                totalCaptionsCount = captions.length + usedCaptions.length;
+                shuffleCaptions();
+                updateCaptionInfo();
+                showCaption();
             } catch (error) {
-                console.error('Error loading files:', error);
-                document.getElementById('caption-box').textContent = 'Error loading data!';
+                console.error('Error fetching captions:', error);
+                document.getElementById('caption-box').textContent = 'Error loading captions!';
             }
         }
 
-        // Get random item from array
-        function getRandomItem(arr) {
-            return arr[Math.floor(Math.random() * arr.length)];
+        function shuffleCaptions() {
+            for (let i = captions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [captions[i], captions[j]] = [captions[j], captions[i]];
+            }
         }
 
-        // Generate caption by filling template placeholders
-        function generateCaption() {
-            if (captions.length === 0 || names.length === 0 || ages.length === 0 || locations.length === 0) {
-                document.getElementById('caption-box').textContent = 'No data available to generate captions!';
+        function updateCaptionInfo() {
+            document.getElementById('total-captions').textContent = `Total Captions: ${totalCaptionsCount}`;
+            document.getElementById('remaining-captions').textContent = `Remaining: ${captions.length}`;
+        }
+
+        function showCaption() {
+            const captionBox = document.getElementById('caption-box');
+
+            if (captions.length === 0) {
+                captionBox.textContent = "No more captions!";
+                document.getElementById('copy-button').disabled = true;
                 return;
             }
 
-            // Get random caption template and replace placeholders
-            const captionTemplate = getRandomItem(captions);
-            const randomName = getRandomItem(names);
-            const randomAge = getRandomItem(ages);
-            const randomLocation = getRandomItem(locations);
-
-            // Replace placeholders
-            const caption = captionTemplate
-                .replace(/{name}/g, randomName)
-                .replace(/{age}/g, randomAge)
-                .replace(/{location}/g, randomLocation);
-
-            document.getElementById('caption-box').textContent = caption;
+            const nextCaption = captions.splice(Math.floor(Math.random() * captions.length), 1)[0];
+            usedCaptions.push(nextCaption);
+            localStorage.setItem('usedCaptions', JSON.stringify(usedCaptions));
+            captionBox.textContent = nextCaption;
+            updateCaptionInfo();
         }
 
-        // Load data on page load
-        window.onload = loadData;
-    </script>
+        function copyAndNext() {
+            const captionBox = document.getElementById('caption-box');
+            const currentCaption = captionBox.textContent;
 
-</body>
-</html>
+            navigator.clipboard.writeText(currentCaption)
+                .then(() => {
+                    console.log('Copied to clipboard:', currentCaption);
+                })
+                .catch(err => {
+                    console.error('Could not copy text:', err);
+                });
+
+            showCaption();
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            if (currentTheme === 'dark') {
+            
