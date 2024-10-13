@@ -29,6 +29,7 @@
             --background-color: #f0f0f0;
             --text-color: #333;
             --primary-color: #007BFF;
+            --box-background-light: rgba(0, 123, 255, 0.1);
             --button-bg: #007BFF;
             --button-hover-bg: #0056b3;
         }
@@ -38,6 +39,7 @@
             --background-color: #121212;
             --text-color: #e0e0e0;
             --primary-color: #BB86FC;
+            --box-background-dark: #1e1e1e; /* Slightly lighter than dark background */
             --button-bg: #BB86FC;
             --button-hover-bg: #8f6fc4;
         }
@@ -58,9 +60,15 @@
             font-size: 20px;
             border: 2px solid var(--primary-color);
             border-radius: 5px;
-            background-color: rgba(0, 123, 255, 0.1);
-            min-height: 50px;
+            background-color: var(--box-background-light);
+            min-height: 100px; /* Fixed minimum height */
+            max-height: 150px; /* Fixed maximum height */
+            overflow-y: auto; /* Scroll if caption is too long */
             transition: background-color 0.3s;
+        }
+
+        [data-theme="dark"] #caption-box {
+            background-color: var(--box-background-dark); /* Lighter box background for dark mode */
         }
 
         #copy-button {
