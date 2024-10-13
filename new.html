@@ -88,6 +88,7 @@
     <div class="container">
         <h1>Group Post Caption Generator</h1>
         <div id="caption-box">Loading...</div>
+        <div class="caption-info" id="caption-info"></div>
         <button id="generate-button" onclick="showCaption()">Generate</button>
         <button id="reset-button" onclick="resetCaptions()">Reset</button>
     </div>
@@ -106,6 +107,7 @@
             try {
                 // Load captions
                 const captionsResponse = await fetch('captions.txt');
+                if (!captionsResponse.ok) throw new Error('Network response was not ok');
                 const captionsText = await captionsResponse.text();
                 captions = captionsText.split('----').map(caption => caption.trim());
                 captions = captions.filter(caption => caption && !usedCaptions.includes(caption)); // Remove already used captions
@@ -113,16 +115,19 @@
 
                 // Load names
                 const namesResponse = await fetch('names.txt');
+                if (!namesResponse.ok) throw new Error('Network response was not ok');
                 const namesText = await namesResponse.text();
                 names = namesText.split('\n').map(name => name.trim());
 
                 // Load ages
                 const agesResponse = await fetch('ages.txt');
+                if (!agesResponse.ok) throw new Error('Network response was not ok');
                 const agesText = await agesResponse.text();
                 ages = agesText.split('\n').map(age => age.trim());
 
                 // Load locations
                 const locationsResponse = await fetch('locations.txt');
+                if (!locationsResponse.ok) throw new Error('Network response was not ok');
                 const locationsText = await locationsResponse.text();
                 locations = locationsText.split('\n').map(location => location.trim());
 
@@ -143,8 +148,8 @@
 
         // Function to update the captions info (total and remaining)
         function updateCaptionInfo() {
-            document.getElementById('total-captions').textContent = `Total Captions: ${totalCaptionsCount}`;
-            document.getElementById('remaining-captions').textContent = `Remaining: ${captions.length}`;
+            const captionInfo = document.getElementById('caption-info');
+            captionInfo.textContent = `Total Captions: ${totalCaptionsCount}, Remaining: ${captions.length}`;
         }
 
         // Function to replace placeholders in the caption
