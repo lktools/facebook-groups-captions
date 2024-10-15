@@ -112,59 +112,58 @@
         let countries = [];
 
         async function loadData() {
-            try {
-                // Load captions
-                const captionsResponse = await fetch('captions.txt');
-                if (!captionsResponse.ok) throw new Error('Network response was not ok');
-                const captionsText = await captionsResponse.text();
-                captions = captionsText.split('----').map(caption => caption.trim());
-                captions = captions.filter(caption => caption && !usedCaptions.includes(caption));
-                totalCaptionsCount = captions.length + usedCaptions.length;
+    try {
+        // Load captions (now from beta.txt)
+        const captionsResponse = await fetch('beta.txt');
+        if (!captionsResponse.ok) throw new Error('Network response was not ok');
+        const captionsText = await captionsResponse.text();
+        captions = captionsText.split('----').map(caption => caption.trim());
+        captions = captions.filter(caption => caption && !usedCaptions.includes(caption)); // Remove already used captions
+        totalCaptionsCount = captions.length + usedCaptions.length;
 
-                // Load names
-                const namesResponse = await fetch('names.txt');
-                if (!namesResponse.ok) throw new Error('Network response was not ok');
-                const namesText = await namesResponse.text();
-                names = namesText.split('\n').map(name => name.trim());
+        // Load names
+        const namesResponse = await fetch('names.txt');
+        if (!namesResponse.ok) throw new Error('Network response was not ok');
+        const namesText = await namesResponse.text();
+        names = namesText.split('\n').map(name => name.trim());
 
-                // Load ages
-                const agesResponse = await fetch('ages.txt');
-                if (!agesResponse.ok) throw new Error('Network response was not ok');
-                const agesText = await agesResponse.text();
-                ages = agesText.split('\n').map(age => age.trim());
+        // Load ages
+        const agesResponse = await fetch('ages.txt');
+        if (!agesResponse.ok) throw new Error('Network response was not ok');
+        const agesText = await agesResponse.text();
+        ages = agesText.split('\n').map(age => age.trim());
 
-                // Load locations
-                const locationsResponse = await fetch('locations.txt');
-                if (!locationsResponse.ok) throw new Error('Network response was not ok');
-                const locationsText = await locationsResponse.text();
-                locations = locationsText.split('\n').map(location => location.trim());
+        // Load locations
+        const locationsResponse = await fetch('locations.txt');
+        if (!locationsResponse.ok) throw new Error('Network response was not ok');
+        const locationsText = await locationsResponse.text();
+        locations = locationsText.split('\n').map(location => location.trim());
 
-                // Load emojis
-                const emojisResponse = await fetch('emojies.txt');
-                if (!emojisResponse.ok) throw new Error('Network response was not ok');
-                const emojisText = await emojisResponse.text();
-                emojis = emojisText.split('\n').map(emoji => emoji.trim());
+        // Load emojis
+        const emojisResponse = await fetch('emojies.txt');
+        if (!emojisResponse.ok) throw new Error('Network response was not ok');
+        const emojisText = await emojisResponse.text();
+        emojis = emojisText.split('\n').map(emoji => emoji.trim());
 
-                // Load jobs
-                const jobsResponse = await fetch('job.txt');
-                if (!jobsResponse.ok) throw new Error('Network response was not ok');
-                const jobsText = await jobsResponse.text();
-                jobs = jobsText.split('\n').map(job => job.trim());
+        // Load jobs
+        const jobsResponse = await fetch('job.txt');
+        if (!jobsResponse.ok) throw new Error('Network response was not ok');
+        const jobsText = await jobsResponse.text();
+        jobs = jobsText.split('\n').map(job => job.trim());
 
-                // Load countries
-                const countriesResponse = await fetch('country.txt');
-                if (!countriesResponse.ok) throw new Error('Network response was not ok');
-                const countriesText = await countriesResponse.text();
-                countries = countriesText.split('\n').map(country => country.trim());
+        // Load countries
+        const countriesResponse = await fetch('country.txt');
+        if (!countriesResponse.ok) throw new Error('Network response was not ok');
+        const countriesText = await countriesResponse.text();
+        countries = countriesText.split('\n').map(country => country.trim());
 
-                updateCaptionInfo();
-                showCaption();
-            } catch (error) {
-                console.error('Error fetching data:', error);
-                document.getElementById('caption-box').textContent = 'Error loading data!';
-            }
-        }
-
+        updateCaptionInfo();
+        showCaption();
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        document.getElementById('caption-box').textContent = 'Error loading data!';
+    }
+}
         function resetCaptions() {
             usedCaptions = [];
             localStorage.removeItem('usedCaptions');
